@@ -15,7 +15,7 @@ mkdir -p $DIR
 
 {
     # check wrangler cache first
-    WRANGLER_LOC=DISABLED/nas/wrangler/NCBI/SRA/Downloads/sra/$SRA_ID.sra
+    WRANGLER_LOC=/nas/wrangler/NCBI/SRA/Downloads/sra/$SRA_ID.sra
     if [ -e $WRANGLER_LOC ]; then
         cp $WRANGLER_LOC $DIR/
     else
