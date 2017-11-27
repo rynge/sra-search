@@ -1,0 +1,65 @@
+#!/bin/bash
+
+set -e
+
+if [ ! -n "$1" -o ! -n "$2" ]; then
+        echo "Usage: `basename $0` <file with list of SRA IDs> <reference basename>"
+        echo "Example: `basename $0` tests/01/sra_ids.txt tests/01/crassphage"
+        exit $E_BADARGS
+fi
+
+SRA_IDS=`basename $1`
+REF_BASENAME=`basename $2`
+
+echo "Creating a DAG for running $SRA_IDS against $REF_BASENAME ..."
+
+TOP_DIR=`dirname $0`
+TOP_DIR=`cd $TOP_DIR && pwd`
+
+# create a work dir for this run
+WORK_DIR=$HOME/runs/`date +'%Y%m%d-%H%M%S'`
+mkdir -p $WORK_DIR
+echo
+echo "Work directory is $WORK_DIR"
+
+# make copies of the input files
+cp $1 $2* $WORK_DIR/
+
+# and of the templates/job files
+cp job.sh job.template $WORK_DIR/
+
+# build the HTCondor submit files and DAG
+cd $WORK_DIR
+I=0
+SUB_DIR=0
+for SRA_ID in `cat $SRA_IDS | sort | uniq`; do
+
+    if [ $(($I % 300)) -eq 0 ]; then
+        export SUB_DIR=$(($SUB_DIR + 1))
+        mkdir -p $SUB_DIR
+    fi
+    I=$(($I + 1))
+
+    # for the job template
+    export SRA_ID
+    export REF_BASENAME
+    INPUT_FILES=""
+    for REF_FILE in `ls $REF_BASENAME*`; do
+        INPUT_FILES="$INPUT_FILES ../$REF_FILE,"
+    done
+    INPUT_FILES=`echo "$INPUT_FILES" | sed 's/, *$//'`
+    export INPUT_FILES
+
+    # generate the job from the template    
+    envsubst <job.template >$SUB_DIR/$SRA_ID.submit
+
+    # add job to the dag
+    cat >>sra.dag <<EOF
+JOB  ID$SRA_ID  $SRA_ID.submit  DIR $SUB_DIR
+EOF
+
+done
+
+condor_submit_dag -notification NEVER -maxidle 1000 sra.dag
+
+
