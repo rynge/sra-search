@@ -13,13 +13,6 @@ mkdir -p $ODIR
 DIR=fastq$$
 mkdir -p $DIR
 
-echo
-echo
-pwd
-ls -al
-echo
-echo
-
 {
     # check wrangler cache first
     WRANGLER_LOC=DISABLED/nas/wrangler/NCBI/SRA/Downloads/sra/$SRA_ID.sra
