@@ -9,6 +9,7 @@ executable = ../job.sh
 arguments = $REF_BASENAME $SRA_ID
 
 transfer_input_files = $INPUT_FILES
+transfer_output_files = $OUTPUT_FILES
 
 Output = $SRA_ID.out
 Error = $SRA_ID.err

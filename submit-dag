@@ -3,8 +3,8 @@
 set -e
 
 if [ ! -n "$1" -o ! -n "$2" ]; then
-        echo "Usage: `basename $0` <file with list of SRA IDs> <reference basename>"
-        echo "Example: `basename $0` tests/01/sra_ids.txt tests/01/crassphage"
+        echo "Usage: ./`basename $0` <file with list of SRA IDs> <reference basename>"
+        echo "Example: ./`basename $0` tests/01/sra_ids.txt tests/01/crassphage"
         exit $E_BADARGS
 fi
 
@@ -26,10 +26,19 @@ echo "Work directory is $WORK_DIR"
 cp $1 $2* $WORK_DIR/
 
 # and of the templates/job files
-cp job.sh job.template $WORK_DIR/
+cp *.sh *.template $WORK_DIR/
+
+cd $WORK_DIR
+
+# final job first, so we can reference it in the parent-child
+# relationships for the actual jobs
+envsubst <local-prepare-outputs.template >local-prepare-outputs.submit
+cat >>sra.dag <<EOF
+
+JOB  ID_PREPARE_OUTPUTS  local-prepare-outputs.submit
+EOF
 
 # build the HTCondor submit files and DAG
-cd $WORK_DIR
 I=0
 SUB_DIR=0
 for SRA_ID in `cat $SRA_IDS | sort | uniq`; do
@@ -50,12 +59,16 @@ for SRA_ID in `cat $SRA_IDS | sort | uniq`; do
     INPUT_FILES=`echo "$INPUT_FILES" | sed 's/, *$//'`
     export INPUT_FILES
 
+    export OUTPUT_FILES="$SRA_ID.bam, $SRA_ID.bam.bai"
+
     # generate the job from the template    
     envsubst <job.template >$SUB_DIR/$SRA_ID.submit
 
     # add job to the dag
     cat >>sra.dag <<EOF
+
 JOB  ID$SRA_ID  $SRA_ID.submit  DIR $SUB_DIR
+PARENT ID$SRA_ID CHILD ID_PREPARE_OUTPUTS
 EOF
 
 done

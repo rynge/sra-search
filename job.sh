@@ -7,26 +7,32 @@ export PATH=/usr/local/sratoolkit/current/bin:/usr/local/bowtie2/current:/usr/lo
 REF_BASENAME=$1
 SRA_ID=$2
 
-ODIR=bam.$REF_BASENAME
-mkdir -p $ODIR
-
 DIR=fastq$$
 mkdir -p $DIR
 
 {
+
     # check wrangler cache first
     WRANGLER_LOC=/nas/wrangler/NCBI/SRA/Downloads/sra/$SRA_ID.sra
     if [ -e $WRANGLER_LOC ]; then
-        cp $WRANGLER_LOC $DIR/
+        SRA_SOURCE="$WRANGLER_LOC"
+        echo "Will read $SRA_ID from $WRANGLER_LOC"
     else
-        # fall back - download directly
-        fastq-dump --outdir $DIR --skip-technical  --readids --read-filter pass --dumpbase --split-files --clip $SRA_ID
+        # default is download from SRA
+        SRA_SOURCE="$SRA_ID"
+        echo "WARNING: $SRA_ID not found on Wrangler - downloading..."
     fi
 
-    READS=$(ls $DIR/* | tr \\n \, | sed -e 's/,$//')
-    bowtie2 -p 6 -q --no-unal -x $REF_BASENAME -U $READS | samtools view -bS - | samtools sort - $ODIR/$SRA_ID
+    fastq-dump --outdir $DIR --skip-technical  --readids --read-filter pass --dumpbase --split-files --clip $SRA_SOURCE
 
-    samtools index $ODIR/$SRA_ID.bam
+    READS=$(ls $DIR/* | tr \\n \, | sed -e 's/,$//')
+    bowtie2 -p 6 -q --no-unal -x $REF_BASENAME -U $READS | samtools view -bS - | samtools sort - $SRA_ID
+
+    samtools index $SRA_ID.bam
+
+    echo
+    ls -l
+    echo
 
 } 2>&1
 
