@@ -16,16 +16,19 @@ echo "Creating a DAG for running $SRA_IDS against $REF_BASENAME ..."
 TOP_DIR=`dirname $0`
 TOP_DIR=`cd $TOP_DIR && pwd`
 
-# create a work dir for this run
-WORK_DIR=$HOME/runs/`date +'%Y%m%d-%H%M%S'`
-mkdir -p $WORK_DIR
-echo
-echo "Work directory is $WORK_DIR"
+# if not already defined, create a work dir for this run
+if [ "x$WORK_DIR" = "x" ]; then
+    WORK_DIR=$HOME/runs/`date +'%Y%m%d-%H%M%S'`
+    mkdir -p $WORK_DIR
+    echo
+    echo "Work directory is $WORK_DIR"
 
-# make copies of the input files
-cp $1 $2* $WORK_DIR/
+    # make copies of the input files
+    cp $1 $2* $WORK_DIR/
+fi
 
 # and of the templates/job files
+cd $TOP_DIR
 cp *.sh *.template $WORK_DIR/
 
 cd $WORK_DIR
