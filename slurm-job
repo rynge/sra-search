@@ -13,8 +13,8 @@ function is_job_running
 
 
 if [ ! -n "$1" -o ! -n "$2" ]; then
-        echo "Usage: ./`basename $0` <file with list of SRA IDs> <reference basename>"
-        echo "Example: ./`basename $0` sra_ids.txt crassphage"
+        echo "Usage: ./`basename $0` <file with list of SRA IDs> <reference file>"
+        echo "Example: ./`basename $0` sra_ids.txt crassphage.fna"
         exit $E_BADARGS
 fi
 

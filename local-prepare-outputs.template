@@ -15,5 +15,8 @@ on_exit_hold = (ExitBySignal == True) || (ExitCode != 0)
 # Periodically retry the jobs every 10 minutes, up to a maximum of 5 retries.
 periodic_release =  (NumJobStarts < 5) && ((CurrentTime - EnteredCurrentStatus) > 10*60)
 
+# extra attributes
++wf_run_id = "$RUN_ID"
+
 queue 1
 
