@@ -33,4 +33,22 @@ while is_job_running $CONDOR_JOB_ID; do
     sleep 10s
 done
 
+if [ -e report.txt ]; then
+    echo
+    cat report.txt
+fi
+
+if (cat sra.dag.dagman.out | tail -n 1 | grep "STATUS 0") >/dev/null 2>&1; then
+    echo
+    echo "Search finished successfully!"
+    echo
+else
+    echo
+    echo "The search finished with errors. Here are the last 100 lines of the log:"
+    echo
+    if [ -e sra.dag.dagman.out ]; then
+        tail -n 100 sra.dag.dagman.out
+    fi
+    exit 1
+fi
 
