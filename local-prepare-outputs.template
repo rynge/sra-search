@@ -2,7 +2,7 @@
 Universe = local
 
 executable = local-prepare-outputs.sh
-arguments = 
+arguments = $RUN_ID
 
 Output = local-prepare-outputs.out
 Error = local-prepare-outputs.err

@@ -19,7 +19,7 @@ TOP_DIR=`dirname $0`
 TOP_DIR=`cd $TOP_DIR && pwd`
 
 # used for directories, and track usage
-export RUN_ID=`date +'%Y%m%d-%H%M%S'`
+export RUN_ID=`uuidgen`
 
 # if not already defined, create a work dir for this run
 if [ "x$WORK_DIR" = "x" ]; then
