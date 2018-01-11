@@ -12,6 +12,11 @@ SRA_IDS=`basename $1`
 REF_FILENAME=`basename $2`
 
 export REF_BASENAME=`echo $REF_FILENAME | perl -p -e 's/\.[a-zA-Z]+$//'`
+if [ "$REF_BASENAME" = "$REF_FILENAME" ]; then
+    # ref file came in without extension - make a copy
+    cp $REF_FILENAME $REF_FILENAME.fna
+    REF_FILENAME="$REF_FILENAME.fna"
+fi
 
 echo "Creating a DAG for running $SRA_IDS against $REF_BASENAME ..."
 
