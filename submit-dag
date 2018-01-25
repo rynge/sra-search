@@ -86,6 +86,8 @@ EOF
 
 done
 
+
+
 condor_submit_dag -notification NEVER -maxidle 1000 sra.dag
 
 

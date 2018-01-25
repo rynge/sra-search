@@ -35,7 +35,7 @@ fi
     fastq-dump --outdir $DIR --skip-technical  --readids --read-filter pass --dumpbase --split-files --clip $SRA_SOURCE
 
     READS=$(ls $DIR/* | tr \\n \, | sed -e 's/,$//')
-    bowtie2 -p 6 -q --no-unal -x $REF_BASENAME -U $READS | samtools view -bS - | samtools sort - $SRA_ID
+    bowtie2 -p 2 -q --no-unal -x $REF_BASENAME -U $READS | samtools view -bS - | samtools sort - $SRA_ID
 
     samtools index $SRA_ID.bam
 
