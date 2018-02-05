@@ -3,7 +3,8 @@ Universe = vanilla
 
 Requirements = True
 request_cpus = 1
-request_memory = 1 GB
+request_memory = 1.5 GB
+request_disk = 2 GB
 
 executable = index.sh
 arguments = $REF_BASENAME
@@ -23,7 +24,7 @@ when_to_transfer_output = ON_EXIT
 on_exit_hold = (ExitBySignal == True) || (ExitCode != 0)
 
 # Periodically retry the jobs every 10 minutes, up to a maximum of 5 retries.
-periodic_release =  (NumJobStarts < 5) && ((CurrentTime - EnteredCurrentStatus) > 10*60)
+periodic_release =  (NumJobStarts < 5) && ((CurrentTime - EnteredCurrentStatus) > 3*60)
 
 # extra attributes
 +wf_run_id = "$RUN_ID"
