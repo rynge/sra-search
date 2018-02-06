@@ -77,8 +77,8 @@ for SRA_ID in `cat $SRA_IDS | sort | uniq`; do
     export SRA_ID_LIST="$SRA_ID_LIST $SRA_ID"
     export OUTPUT_FILES=`echo "$OUTPUT_FILES, $SRA_ID.bam, $SRA_ID.bam.bai" | sed 's/^ *,//'`
     
-    # 5 searches per job
-    if [ $(($SRA_COUNT % 5)) -eq 0 ]; then
+    # 10 searches per job
+    if [ $(($SRA_COUNT % 10)) -eq 0 ]; then
     
         # 100 jobs per directory
         if [ $(($JOB_COUNT % 100)) -eq 0 ]; then

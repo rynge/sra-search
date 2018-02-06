@@ -33,7 +33,7 @@ fi
             continue 
         fi
     
-        bowtie2 -p 2 -q --no-unal -x $REF_BASENAME -U $SRA_SOURCE | samtools view -bS - | samtools sort - $SRA_ID
+        bowtie2 -p 1 -q --no-unal -x $REF_BASENAME -U $SRA_SOURCE | samtools view -bS - | samtools sort - $SRA_ID
     
         samtools index $SRA_ID.bam
 
