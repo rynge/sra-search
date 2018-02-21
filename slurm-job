@@ -17,18 +17,28 @@ function wait_for_dag
     ERROR_COUNT=0
     DONE=0
     while [ $DONE = 0 ]; do
+
+        if (cat sra.dag.dagman.out | tail -n 1 | grep "EXITING WITH STATUS") >/dev/null 2>&1; then
+            my_log "Job completed (according to the DAGMan log file)"
+            return 0
+        fi
+
         STATUS=`condor_q $JOB_ID -nob -af JobStatus 2>/dev/null`
 
-        # see http://pages.cs.wisc.edu/~adesmet/status.html
-        if [ "X$STATUS" = "X5" ]; then
-            DONE=1
-        elif [ "X$STATUS" = "X2" ]; then
-            ERROR_COUNT=0
-        elif [ "X$STATUS" = "X" ]; then
+        if [ "X$STATUS" = "X" ]; then
             # can't find dag - try for a while, and then give up
             ERROR_COUNT=$(($ERROR_COUNT + 1))
-            if [ $ERROR_COUNT -gt 10 ]; then
+            if [ $ERROR_COUNT -gt 100 ]; then
+                my_log "Unable to monitor job - giving up!"
                 return 0
+            fi
+        else
+            # see http://pages.cs.wisc.edu/~adesmet/status.html
+            if [ "X$STATUS" = "X5" ]; then
+                my_log "Job completed (according to job status)"
+                return 0
+            elif [ "X$STATUS" = "X2" ]; then
+                ERROR_COUNT=0
             fi
         fi
         sleep 10s

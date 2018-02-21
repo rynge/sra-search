@@ -130,6 +130,6 @@ echo "Created $JOB_COUNT jobs to process $SRA_COUNT ids"
 
 
 
-condor_submit_dag -notification NEVER -maxidle 1000 sra.dag
+condor_submit_dag -notification NEVER -maxidle 25 sra.dag
 
 
