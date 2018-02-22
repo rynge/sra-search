@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 ADMIN_EMAILS="raedwards@gmail.com, rynge@isi.edu, eroma_a@yahoo.com"
 
 function my_log
@@ -18,30 +16,31 @@ function wait_for_dag
     DONE=0
     while [ $DONE = 0 ]; do
 
-        if (cat sra.dag.dagman.out | tail -n 1 | grep "EXITING WITH STATUS") >/dev/null 2>&1; then
+	# EXITING WITH STATUS 3 - condor restart
+        if (cat sra.dag.dagman.out | tail -n 1 | grep -v "EXITING WITH STATUS 3" | grep "EXITING WITH STATUS") >/dev/null 2>&1; then
             my_log "Job completed (according to the DAGMan log file)"
             return 0
         fi
 
-        STATUS=`condor_q $JOB_ID -nob -af JobStatus 2>/dev/null`
+        #STATUS=`condor_q $JOB_ID -nob -af JobStatus 2>/dev/null`
+        #if [ "X$STATUS" = "X" ]; then
+        #    # can't find dag - try for a while, and then give up
+        #    ERROR_COUNT=$(($ERROR_COUNT + 1))
+        #    if [ $ERROR_COUNT -gt 100 ]; then
+        #        my_log "Unable to monitor job - giving up!"
+        #        return 0
+        #    fi
+        #else
+        #    # see http://pages.cs.wisc.edu/~adesmet/status.html
+        #    if [ "X$STATUS" = "X5" ]; then
+        #        my_log "Job completed (according to job status)"
+        #        return 0
+        #    elif [ "X$STATUS" = "X2" ]; then
+        #        ERROR_COUNT=0
+        #    fi
+        #fi
 
-        if [ "X$STATUS" = "X" ]; then
-            # can't find dag - try for a while, and then give up
-            ERROR_COUNT=$(($ERROR_COUNT + 1))
-            if [ $ERROR_COUNT -gt 100 ]; then
-                my_log "Unable to monitor job - giving up!"
-                return 0
-            fi
-        else
-            # see http://pages.cs.wisc.edu/~adesmet/status.html
-            if [ "X$STATUS" = "X5" ]; then
-                my_log "Job completed (according to job status)"
-                return 0
-            elif [ "X$STATUS" = "X2" ]; then
-                ERROR_COUNT=0
-            fi
-        fi
-        sleep 10s
+        sleep 20s
     done
 
     return 0
@@ -66,12 +65,14 @@ CONDOR_JOB_ID=`cat submit.log | grep "submitted to cluster" | perl -p -i -e 's/.
 my_log "Monitoring HTCondor job id $CONDOR_JOB_ID"
 
 # also send email about it
-cat <<EOF | mailx -s "SRA Gateway: New search submitted - $SLURM_SUBMIT_DIR" "$ADMIN_EMAILS"
-Started a new SRA Gateway search:
+if [ "X$USER" = "Xgw" ]; then
+    cat <<EOF | mailx -s "SRA Gateway: New search submitted - $SLURM_SUBMIT_DIR" "$ADMIN_EMAILS"
+Started a new SRA Gateway search for user $AIRAVATA_USERNAME:
 
 SLURM_SUBMIT_DIR = $SLURM_SUBMIT_DIR
 HTCondor DAG ID = $CONDOR_JOB_ID
 EOF
+fi
 
 wait_for_dag $CONDOR_JOB_ID
 
@@ -107,7 +108,9 @@ else
 fi
 
 # send admin email
-cat $MAIL_BODY_FILE | mailx -s "$MAIL_SUBJECT" "$ADMIN_EMAILS"
+if [ "X$USER" = "Xgw" ]; then
+    cat $MAIL_BODY_FILE | mailx -s "$MAIL_SUBJECT" "$ADMIN_EMAILS"
+fi
 
 exit $EXIT_CODE
 
