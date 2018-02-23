@@ -77,11 +77,11 @@ for SRA_ID in `cat $SRA_IDS | sort | uniq`; do
     export SRA_ID_LIST="$SRA_ID_LIST $SRA_ID"
     export OUTPUT_FILES=`echo "$OUTPUT_FILES, $SRA_ID.bam, $SRA_ID.bam.bai" | sed 's/^ *,//'`
     
-    # 25 searches per job
-    if [ $(($SRA_COUNT % 25)) -eq 0 ]; then
+    # 50 searches per job
+    if [ $(($SRA_COUNT % 50)) -eq 0 ]; then
     
-        # 100 jobs per directory
-        if [ $(($JOB_COUNT % 100)) -eq 0 ]; then
+        # 50 jobs per directory
+        if [ $(($JOB_COUNT % 50)) -eq 0 ]; then
             export SUB_DIR=$(($SUB_DIR + 1))
             mkdir -p $SUB_DIR
         fi
@@ -106,8 +106,8 @@ done
 
 # leftover jobs
 if [ "X$SRA_ID_LIST" != "X" ]; then
-    # 100 jobs per directory
-    if [ $(($JOB_COUNT % 100)) -eq 0 ]; then
+    # 50 jobs per directory
+    if [ $(($JOB_COUNT % 50)) -eq 0 ]; then
         export SUB_DIR=$(($SUB_DIR + 1))
         mkdir -p $SUB_DIR
     fi
@@ -130,6 +130,6 @@ echo "Created $JOB_COUNT jobs to process $SRA_COUNT ids"
 
 
 
-condor_submit_dag -notification NEVER -maxidle 25 sra.dag
+condor_submit_dag -notification NEVER -maxidle 50 sra.dag
 
 
