@@ -8,6 +8,16 @@ if [ ! -n "$1" -o ! -n "$2" ]; then
         exit $E_BADARGS
 fi
 
+# ensure the files are in ASCII format
+if ! (file --brief $1 | grep ASCII) >/dev/null 2>&1; then
+    echo "ERROR: id list file is not in ASCII format"
+    exit 1
+fi
+if ! (file --brief $2 | grep ASCII) >/dev/null 2>&1; then
+    echo "ERROR: Reference file is not in ASCII format"
+    exit 1
+fi
+
 SRA_IDS=`basename $1`
 REF_FILENAME=`basename $2`
 
